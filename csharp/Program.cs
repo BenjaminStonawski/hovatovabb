@@ -17,7 +17,7 @@ namespace HovaTovabbCsharp
                 Felhasznalonev = "benjike",
                 Jelszo = "tesztelek",
                 TeljesNev = "Stonawski Benjamin",
-                Email = "bendzsike6@gmail.com",
+                Email = "benjike@benjike.hu",
                 Kedvezmeny = diak
             };
 
@@ -134,4 +134,5 @@ namespace HovaTovabbCsharp
             Console.ReadKey();
         }
     }
+
 }
