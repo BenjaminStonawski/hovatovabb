@@ -13,6 +13,10 @@ Az app képes **automatikus útvonaltervezésre**, de lehetőséget biztosít **
 
 ---
 
+## 🔗 Linkek
+Weboldal: <a href="https://hova-tovabb.hu/">hova-tovabb.hu</a>
+Figma: <a href="https://eject-break-52705372.figma.site/">figma.site</a>
+
 ## 🎯 Célunk az alkalmazással  
 - A legjobb alternatívát nyújtani a jelenlegi menetrendkereső alkalmazásokhoz képest  
 - Valós idejű és pontos információ biztosítása  
