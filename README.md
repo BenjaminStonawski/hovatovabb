@@ -48,7 +48,7 @@ Figma oldalak
 - **Frontend:** Angular  
 - **Backend:** Node.js  
 - **Adatbázis:** MySQL  
-- **API-k:** több külső API (térképszolgáltatás és menetrendek integrálásához)  
+- **API-k:** több külső API (menetrendek integrálásához, SQL adatbázis)  
 
 ---
 
