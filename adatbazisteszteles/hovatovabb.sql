@@ -1,7 +1,7 @@
 --
--- Database: `hovatovabb_test`
+-- Database: `hovatovabb`
 --
-CREATE DATABASE `hovatovabb_test`;
+CREATE DATABASE `hovatovabb`;
 USE `hovatovabb_test`;
 
 -- --------------------------------------------------------
