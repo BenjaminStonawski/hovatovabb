@@ -2,7 +2,7 @@
 -- Database: `hovatovabb`
 --
 CREATE DATABASE `hovatovabb`;
-USE `hovatovabb_test`;
+USE `hovatovabb`;
 
 -- --------------------------------------------------------
 
