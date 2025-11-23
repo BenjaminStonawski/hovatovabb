@@ -1,0 +1,223 @@
+<div class="journey-card">
+
+  <!-- Header row: icons, domain (conditionally), transfers indicator, add button -->
+  <!-- Nagy képernyő: 1 row -->
+  <div class="row d-none d-md-flex align-items-center">
+    <!-- bal -->
+    <div class="col-md-4 chip-row">
+      <div class="chip transport">
+        <ng-container *ngFor="let m of vehicleModes">
+          <img class="chip-icon" [src]="iconForMode(m)" />
+        </ng-container>
+
+        <span *ngIf="transfers === 0" class="domain-code">
+          {{ journey.nativeData[0].JourneyName || journey.nativeData[0].LocalDomainCode }}
+        </span>
+      </div>
+
+      <div class="chip agency" *ngIf="journey.nativeData[0]?.OwnerName && transfers === 0">
+        {{ journey.nativeData[0].OwnerName }}
+      </div>
+    </div>
+
+    <!-- középső -->
+    <div class="col-md-4 text-center">
+      <div *ngIf="transfers > 0; else noTransfers" class="transfers-indicator" (click)="toggleSegments()">
+        Átszállás: {{ transfers }}
+        <span class="caret">{{ showSegments ? '▴' : '▾' }}</span>
+      </div>
+      <ng-template #noTransfers>
+        <div class="transfers-indicator">
+          <img src="icons/ticket.svg" class="clock" />
+          <label *ngIf="journey.nativeData[0]?.Fare > 0; else noTicket">
+            {{ journey.nativeData[0]?.Fare }} Ft
+          </label>
+          <ng-template #noTicket>
+            <label>
+              Jegyár nem elérhető
+            </label>
+          </ng-template>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- jobb -->
+    <div class="col-md-4 text-end">
+      <button class="add-btn">
+        <span class="plus">+</span> Tervhez
+      </button>
+    </div>
+  </div>
+
+  <!-- Közepes és kisebb: 2 row -->
+  <div class="d-md-none">
+    <!-- első sor: bal + jobb -->
+    <div class="row align-items-center mb-2">
+      <div class="col-6 chip-row">
+        <div class="chip transport">
+          <ng-container *ngFor="let m of vehicleModes">
+            <img class="chip-icon" [src]="iconForMode(m)" />
+          </ng-container>
+
+          <span *ngIf="transfers === 0" class="domain-code">
+            {{ journey.nativeData[0].JourneyName || journey.nativeData[0].LocalDomainCode }}
+          </span>
+        </div>
+
+        <div class="chip agency" *ngIf="journey.nativeData[0]?.OwnerName && transfers === 0">
+          {{ journey.nativeData[0].OwnerName }}
+        </div>
+      </div>
+
+      <div class="col-6 text-end">
+        <button class="add-btn">
+          <span class="plus">+</span> Tervhez
+        </button>
+      </div>
+    </div>
+
+    <!-- második sor: középső -->
+    <div class="row">
+      <div *ngIf="transfers > 0; else noTransfers" class="transfers-indicator" (click)="toggleSegments()">
+        Átszállás: {{ transfers }}
+        <span class="caret">{{ showSegments ? '▴' : '▾' }}</span>
+      </div>
+      <ng-template #noTransfers>
+        <div class="transfers-indicator">
+          <img src="icons/ticket.svg" class="clock" />
+          <label *ngIf="journey.nativeData[0]?.Fare > 0; else noTicket">
+            {{ journey.nativeData[0]?.Fare }} Ft
+          </label>
+          <ng-template #noTicket>
+            <label>
+              Jegyár nem elérhető
+            </label>
+          </ng-template>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-4">
+      <div class="block">
+        <label>Indulás</label>
+        <div class="time">{{ format(journey.nativeData[0]?.DepartureTime ?? journey.departure) }}</div>
+        <div class="station">
+          <img src="icons/pin.svg" class="pin" />
+          {{ journey.nativeData[0]?.DepStationName.includes('állomás') 
+            ? journey.nativeData[0]?.DepStationName.replace('állomás', 'áll.')
+            : journey.nativeData[0]?.DepStationName.includes('pályaudvar')
+            ? journey.nativeData[0]?.DepStationName.replace('pályaudvar', 'pu.')
+            : journey.nativeData[0]?.DepStationName.includes('váróterem')
+            ? journey.nativeData[0]?.DepStationName.replace('váróterem', 'vt.')
+            : journey.nativeData[0]?.DepStationName }}
+        </div>
+        <div class="platform" *ngIf="journey.nativeData[0]?.Platform">
+          Vágány: {{ journey.nativeData[0].Platform }}
+        </div>
+      </div>
+    </div>
+
+    <div class="col-4">
+      <div class="duration">
+        <img src="icons/clock.svg" class="clock" />
+        {{ journey.osszido ?? journey.duration ?? '—' }}
+      </div>
+    </div>
+
+    <div class="col-4">
+      <div class="block text-end">
+        <label>Érkezés</label>
+        <div class="time">
+          {{ format(journey.nativeData[journey.nativeData.length - 1]?.ArrivalTime ?? journey.arrival) }}
+        </div>
+        <div class="station-right">
+          <img src="icons/pin.svg" class="pin" /> 
+          {{ journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.includes('állomás') 
+            ? journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.replace('állomás', 'áll.')
+            : journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.includes('pályaudvar')
+            ? journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.replace('pályaudvar', 'pu.')
+            : journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.includes('váróterem')
+            ? journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.replace('váróterem', 'vt.')
+            : journey.nativeData[journey.nativeData.length - 1]?.ArrStationName }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Expanded segment list -->
+  <div *ngIf="showSegments" class="segments-list">
+    <div *ngFor="let seg of journey.nativeData; let i = index" class="segment">
+      <div class="seg-header">
+        <div class="seg-index">{{ i + 1 }}. szakasz</div>
+        <div class="seg-mode">
+          <img class="chip-icon" [src]="iconForMode(seg.TransportMode ?? seg.Mode)" />
+          <strong>{{ seg.LongName || seg.Number || seg.LocalDomainCode || '' }}</strong>
+        </div>
+      </div>
+
+      <div class="seg-body">
+        <div class="row">
+          <div class="col-4">
+            <div class="block">
+              <label>Indulás</label>
+              <div class="time">{{ format(seg.DepartureTime) }}</div>
+              <div class="station">
+                <img src="icons/pin.svg" class="pin" />
+                {{ seg.DepStationName.includes('autóbusz-állomás') 
+                    ? seg.DepStationName.replace('autóbusz-állomás', 'autóbusz-áll.') 
+                    : seg.DepStationName.includes('pályaudvar')
+                    ? seg.DepStationName.replace('pályaudvar', 'pu.')
+                    : seg.DepStationName.includes('váróterem')
+                    ? seg.DepStationName.replace('váróterem', 'vt.')
+                    : seg.DepStationName }}
+              </div>
+              <div class="platform" *ngIf="seg.Platform">
+                Vágány: {{ seg.Platform }}
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="seg.Fare && seg.Fare > 0; else noTicket" class="col-4 text-center">
+            <div>
+              <img src="icons/ticket.svg" class="clock" /><br>
+              <label>
+                {{ seg.Fare }} Ft
+              </label>
+            </div>
+          </div>
+          <ng-template #noTicket>
+            <div class="col-4 text-center">
+              <img src="icons/ticket.svg" class="clock" /><br>
+              <label>
+                –
+              </label>
+            </div>
+          </ng-template>
+          
+
+          <div class="col-4">
+            <div class="block text-end">
+              <label>Érkezés</label>
+              <div class="time">
+                {{ format(seg.ArrivalTime) }}
+              </div>
+              <div class="station-right">
+                <img src="icons/pin.svg" class="pin" />
+                {{ seg.ArrStationName.includes('autóbusz-állomás') 
+                    ? seg.ArrStationName.replace('autóbusz-állomás', 'autóbusz-áll.')
+                    : seg.ArrStationName.includes('pályaudvar')
+                    ? seg.ArrStationName.replace('pályaudvar', 'pu.')
+                    : seg.ArrStationName.includes('váróterem')
+                    ? seg.ArrStationName.replace('váróterem', 'vt.')
+                    : seg.ArrStationName }}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

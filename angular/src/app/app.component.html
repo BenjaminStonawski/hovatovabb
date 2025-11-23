@@ -1,0 +1,55 @@
+<div class="app-container">
+
+  <!-- HEADER -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo-wrap">
+        <img src="img/hovatovabb-512.png" alt="HovaTovább" style="width: 10%;">
+
+        <div>
+          <h1 class="app-title">HovaTovább</h1>
+          <p class="app-subtitle">Magyar tömegközlekedési menetrendtervező</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <div class="main">
+    
+    <!-- TABS -->
+    <div class="tabs">
+      <button 
+        class="tab-button"
+        [class.active]="activeTab === 'search'"
+        (click)="activeTab = 'search'">
+        <img src="icons/train.svg" class="tab-icon">
+        Keresés
+      </button>
+
+      <button 
+        class="tab-button"
+        [class.active]="activeTab === 'plans'"
+        (click)="activeTab = 'plans'">
+        <img src="icons/map.svg" class="tab-icon">
+        Terveim
+      </button>
+    </div>
+
+    <!-- TAB CONTENT -->
+    <div class="content">
+      <div *ngIf="activeTab === 'search'">
+        <app-search></app-search>
+      </div>
+
+      <div *ngIf="activeTab === 'plans'">
+        <app-plans (viewPlan)="openPlan($event)"></app-plans>
+      </div>
+
+      <div *ngIf="activeTab === 'details'">
+        <app-plan-details [plan]="selectedPlan" (back)="backToPlans()"></app-plan-details>
+      </div>
+    </div>
+
+  </div>
+</div>
