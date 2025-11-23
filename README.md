@@ -1,10 +1,6 @@
 # HovaTovább  
 *Készítette: Deák Levente és Stonawski Benjamin (13. B)*  
 
-<p align="center">
-  <img src="img/logo.png" alt="HovaTovább logó" width="200"/>
-</p>
-
 <img align='right' src="img/logo.png" width="230">
 <p><em>Magyar tömegközlekedési menetrendtervező </em></p>
 
