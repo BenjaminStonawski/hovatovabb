@@ -1,59 +1,52 @@
-# Hovatovabb
+# HovaTovább - Angular Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.19.
+📖 **Miről szól az Angular projekt**
 
-## Development server
+Ez az `angular/` mappa tartalmazza a HovaTovább alkalmazás **frontend részét**, amely Angular keretrendszerben készült.  
+Felelős a felhasználói felület megjelenítéséért, a menetrendek megjelenítéséért és az útvonaltervezés interaktív működéséért.
 
-To start a local development server, run:
+---
 
-```bash
-ng serve
-```
+## ⚙️ Főbb funkciók
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+### Alapfunkciók
+- 🚏 Automatikus útvonaltervezés a magyarországi menetrendek alapján
+- ⏱️ Valós idejű adatok megjelenítése (indulási és érkezési időpontok)
+- 📱 Könnyen áttekinthető, felhasználóbarát felület
 
-## Code scaffolding
+### Egyedi funkciók
+- 🔄 Késések kezelése: az app figyelembe veszi a járatok valós idejű késéseit
+- ✏️ Manuális menetrendtervezés: a bejelentkezett felhasználók saját menetrendet állíthatnak össze
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
-```bash
-ng generate component component-name
-```
+## 🛠️ Használt technológiák
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- **Frontend:** Angular (TypeScript, HTML, SCSS)  
+- **Komponensek:** Angular Material, RxJS  
+- **API-k:** Kommunikáció a Node.js backenddel RESTful hívásokkal
 
-```bash
-ng generate --help
-```
+---
 
-## Building
+## 🚀 Továbbfejleszthetőség
 
-To build the project run:
+A frontend moduláris felépítésének köszönhetően könnyen bővíthető:
 
-```bash
-ng build
-```
+- 👥 Közösségi funkciók (pl. menetrendek megosztása)
+- 🔔 Személyre szabott értesítések
+- 🎨 UI/UX fejlesztések, új témák és reszponzív design
+- 🚲 Alternatív közlekedési módok integrálása
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
+## 📌 Projekt állapota
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+Ez az Angular projekt **jelenleg fejlesztés alatt áll**, de már biztosítja a fő felhasználói interakciókat és az útvonaltervező logikát.  
+A projekt később teljes funkcionalitású frontendként szolgál a HovaTovább alkalmazáshoz.
 
-```bash
-ng test
-```
+---
 
-## Running end-to-end tests
+## 👨‍💻 Készítők
 
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+- Deák Levente  
+- Stonawski Benjamin
