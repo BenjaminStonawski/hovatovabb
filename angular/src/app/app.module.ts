@@ -9,6 +9,7 @@ import { SearchFormComponent } from './features/search/search-form/search-form.c
 import { SearchResultsComponent } from './features/search/search-results/search-results.component';
 import { JourneyCardComponent } from './features/search/journey-card/journey-card.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
+import { JourneyInfoComponent } from './features/search/journey-info/journey-info.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { ServiceWorkerModule } from '@angular/service-worker';
     SearchComponent,
     SearchFormComponent,
     SearchResultsComponent,
-    JourneyCardComponent
+    JourneyCardComponent,
+    JourneyInfoComponent
   ],
   imports: [
     BrowserModule,

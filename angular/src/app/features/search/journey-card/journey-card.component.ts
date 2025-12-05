@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 
 @Component({
   selector: 'app-journey-card',
@@ -8,6 +8,11 @@ import { Component, Input } from '@angular/core';
 })
 export class JourneyCardComponent {
   @Input() journey: any;
+  @Output() info = new EventEmitter<any>();
+
+  openInfo() {
+    this.info.emit(this.journey);
+  }
 
   // állapot: kibontva vagy sem
   showSegments = false;
@@ -56,12 +61,20 @@ export class JourneyCardComponent {
     const perc = String(m).padStart(2, '0');
 
     if (ora >= 24) {
-      const masnapOra = -1* (ora - 24);
-      if (masnapOra < 10) {
-        return `0${masnapOra}:${perc}`;
+      let masnapOra = -1 * (ora - 24);
+      if (masnapOra < 0) {
+        masnapOra = masnapOra * -1;
+        if (masnapOra < 10) {
+          return `0${masnapOra}:${perc}`;
+        }
       }
       else {
-        return `${masnapOra}:${perc}`;
+        if (masnapOra < 10) {
+          return `0${masnapOra}:${perc}`;
+        }
+        else {
+          return `${masnapOra}:${perc}`;
+        }
       }
     }
     return `${oraStr}:${perc}`;

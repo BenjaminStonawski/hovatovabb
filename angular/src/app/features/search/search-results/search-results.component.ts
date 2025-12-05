@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { JourneyResult } from '../../../models.model';
 
 @Component({
@@ -9,4 +9,9 @@ import { JourneyResult } from '../../../models.model';
 })
 export class SearchResultsComponent {
   @Input() journeys: JourneyResult[] = [];
+  @Output() info = new EventEmitter<any>();
+
+  onInfo(journey: any) {
+    this.info.emit(journey);
+  }
 }

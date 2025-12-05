@@ -2,6 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
+const dotenv = require("dotenv");
+dotenv.config();
 
 const app = express();
 const PORT = 3000;
@@ -9,13 +11,14 @@ const PORT = 3000;
 app.use(cors());
 app.use(bodyParser.json());
 
-const API_URL = "https://menetrendek.hu/menetrend/newinterface/index.php";
+const API_URL = process.env.API_URL;
 
 const db = mysql.createPool({
-  host: "127.0.0.1",
-  user: "",
-  password: "",
-  database: "hovatovabb",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASS,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
 });
 
 // fetch wrapper (dinamikus import)
@@ -51,7 +54,6 @@ app.post("/api/searchStation", async (req, res) => {
   }
 });
 
-// Járatok keresése
 // Járatok keresése
 app.post("/api/searchRoutes", async (req, res) => {
   const { from, to } = req.body;
@@ -172,6 +174,33 @@ app.post("/api/searchRoutesCustom", async (req, res) => {
   }
 });
 
+// Járat leírás
+app.post("/api/runDescription", async (req, res) => {
+  const { runId, slsId, elsId, date } = req.body;
+
+  const payload = {
+    query: "runDecriptionC",
+    run_id: runId,
+    domain_type: 1,
+    sls_id: slsId,
+    els_id: elsId,
+    location: "hk",
+    datum: date,
+  };
+
+  try {
+    const response = await fetch("https://menetrendek.hu/...", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    res.json(data?.results?.kifejtes_sor || {});
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Bejelentkezés
 app.post("/api/login", async (req, res) => {

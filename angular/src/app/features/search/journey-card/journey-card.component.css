@@ -229,3 +229,19 @@ label {
   flex-direction:column;
   gap:4px;
 }
+
+.info-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+}
+
+.info-icon {
+  width: 22px;
+  opacity: .8;
+}
+
+.info-btn:hover .info-icon {
+  opacity: 1;
+}

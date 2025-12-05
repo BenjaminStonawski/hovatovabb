@@ -1,0 +1,78 @@
+<div class="overlay" (click)="onClose()"></div>
+
+<div class="modal-container">
+    <div class="modal-header">
+        <h3>Járat részletei</h3>
+        <button class="close-btn" (click)="onClose()">✕</button>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+        <img src="img/loading.gif" width="30">
+    </div>
+
+    <div *ngIf="error" class="error">{{ error }}</div>
+
+    <div class="segments mt-3">
+        <div *ngFor="let seg of stops; let i = index" class="segment-box">
+            <h4 class="segment-title">
+                <!-- jármű ikon -->
+                <img class="chip-icon" [src]="getSegmentIcon(seg.segment)" />
+
+                <!-- ha van átszállás → szakasz számozás -->
+                <ng-container *ngIf="stops.length > 1; else noTransferTitle">
+                    <span class="seg-index">{{ i + 1 }}. szakasz – </span>
+                    <span class="seg-line">
+                        {{ seg.segment.LongName || seg.segment.Number }}
+                    </span>
+                </ng-container>
+
+                <!-- ha nincs átszállás → csak járatszám -->
+                <ng-template #noTransferTitle>
+                    <span class="seg-line">
+                        {{ seg.segment.LongName || seg.segment.Number }}
+                    </span>
+                </ng-template>
+
+            </h4>
+
+            <div *ngIf="i === 0 && hasHiddenStart" class="show-full" (click)="showFull = !showFull">
+                Teljes útvonal megjelenítése {{ showFull ? '▴' : '▾' }}
+            </div>
+
+            <table *ngIf="i !== 0 || !hasHiddenStart || showFull">
+                <tr>
+                    <th>Megálló</th>
+                    <th>Érkezik</th>
+                    <th>Indul</th>
+                </tr>
+
+                <tr *ngFor="let s of seg.stops">
+                    <td>{{ s.megallo }}</td>
+                    <td *ngIf="s.varhato_erkezik == 'n.a.' || s.varhato_erkezik == ''; else estimatedDepTime">
+                        {{ s.erkezik || '-' }}
+                    </td>
+                    <ng-template #estimatedDepTime>
+                        <td style="color: #f87171;">
+                            {{ s.varhato_erkezik || '-' }}
+                        </td>
+                    </ng-template>
+
+                    <td *ngIf="s.varhato_indul == 'n.a.' || s.varhato_indul == ''; else estimatedArrTime">
+                        {{ s.indul || '-' }}
+                    </td>
+                    <ng-template #estimatedArrTime>
+                        <td style="color: #f87171;">
+                            {{ s.varhato_indul || '-' }}
+                        </td>
+                    </ng-template>
+                </tr>
+            </table>
+
+            <div *ngIf="seg.stops.length === 0" class="muted">
+                Nincs adat ehhez a szakaszhoz.
+            </div>
+
+        </div>
+    </div>
+
+</div>
