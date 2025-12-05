@@ -53,7 +53,7 @@
   <app-journey-info
     *ngIf="selectedJourneyInfo"
     [journey]="selectedJourneyInfo"
-    [date]="selectedDate"
+    [date]="selectedDate || defaultDate"
     (close)="closeJourneyInfo()">
   </app-journey-info>
 </div>

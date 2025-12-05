@@ -20,6 +20,7 @@ export class SearchComponent implements OnInit {
   dateValue: string = '';
   timeValue: string = '';
 
+  defaultDate = new Date().toISOString().split("T")[0];
   delayLoading = false;
 
   ngOnInit() {

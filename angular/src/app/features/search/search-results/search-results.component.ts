@@ -10,8 +10,12 @@ import { JourneyResult } from '../../../models.model';
 export class SearchResultsComponent {
   @Input() journeys: JourneyResult[] = [];
   @Output() info = new EventEmitter<any>();
+  @Input() date: string = ""; 
+
+  showInfo = false;
 
   onInfo(journey: any) {
     this.info.emit(journey);
+    this.showInfo = true;
   }
 }

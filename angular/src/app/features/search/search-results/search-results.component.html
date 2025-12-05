@@ -1,3 +1,7 @@
 <div class="results-list">
-  <app-journey-card *ngFor="let j of journeys" [journey]="j" (info)="onInfo(j)"></app-journey-card>
+  <app-journey-card
+    *ngFor="let j of journeys"
+    [journey]="j"
+    (info)="onInfo(j)">
+  </app-journey-card>
 </div>

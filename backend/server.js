@@ -176,29 +176,52 @@ app.post("/api/searchRoutesCustom", async (req, res) => {
 
 // Járat leírás
 app.post("/api/runDescription", async (req, res) => {
-  const { runId, slsId, elsId, date } = req.body;
-
-  const payload = {
-    query: "runDecriptionC",
-    run_id: runId,
-    domain_type: 1,
-    sls_id: slsId,
-    els_id: elsId,
-    location: "hk",
-    datum: date,
-  };
-
   try {
-    const response = await fetch("https://menetrendek.hu/...", {
+    // Full compatibility: accept both camelCase and snake_case
+    const {
+      runId, run_id,
+      slsId, sls_id,
+      elsId, els_id,
+      date
+    } = req.body;
+
+    const runIdFinal = runId ?? run_id;
+    const slsIdFinal = slsId ?? sls_id;
+    const elsIdFinal = elsId ?? els_id;
+
+    // Validate parameters
+    if (!runIdFinal || !slsIdFinal || !elsIdFinal || !date) {
+      return res.status(400).json({
+        error: "Missing or invalid parameters",
+        received: req.body
+      });
+    }
+
+    const payload = {
+      query: "runDecriptionC",
+      run_id: runIdFinal,
+      domain_type: 1,
+      sls_id: slsIdFinal,
+      els_id: elsIdFinal,
+      location: "hk",
+      datum: date,
+    };
+
+    const response = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
-    res.json(data?.results?.kifejtes_sor || {});
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    // Return ONLY kifejtes_sor, fallback {}, frontend expects object
+    return res.json(data?.results?.kifejtes_sor || {});
+  }
+
+  catch (err) {
+    console.error("runDescription API ERROR:", err);
+    return res.status(500).json({ error: err.message });
   }
 });
 
