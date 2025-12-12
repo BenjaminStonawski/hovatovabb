@@ -242,6 +242,54 @@ app.post("/api/login", async (req, res) => {
   }
 });
 
+// Regisztráció
+app.post("/api/register", async (req, res) => {
+  const { felhasznalonev, jelszo, email, teljes_nev, kedv_id } = req.body;
+  try {
+    const [rows] = await db.query(
+      "INSERT INTO felhasznalo (felhasznalonev, jelszo, email, teljes_nev, kedv_id) VALUES (?, ?, ?, ?, ?)",
+      [felhasznalonev, jelszo, email, teljes_nev, kedv_id]
+    );
+    res.json({ message: "Regisztráció sikeres" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Felhasználó adatainak módosítása
+app.put("/api/user/:felhasznalonev", async (req, res) => {
+  const { felhasznalonev } = req.params;
+  const { email, teljes_nev, kedv_id, jelszo } = req.body;
+  try {
+    const [rows] = await db.query("UPDATE felhasznalo SET email = ?, teljes_nev = ?, kedv_id = ?, jelszo = ? WHERE felhasznalonev = ?", [email, teljes_nev, kedv_id, jelszo, felhasznalonev]);
+    res.json({ message: "Felhasználó adatainak frissítése sikeres" });
+  } catch (err) { 
+    res.status(500).json({ error: err.message }); 
+  }
+});
+
+// Felhasználó törlése
+app.delete("/api/user/:felhasznalonev", async (req, res) => {
+  const { felhasznalonev } = req.params;
+  try {
+    const [rows] = await db.query("DELETE FROM felhasznalo WHERE felhasznalonev = ?", [felhasznalonev]);
+    res.json({ message: "Felhasználó törlése sikeres" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Felhasználó adatai
+app.get("/api/user/:felhasznalonev", async (req, res) => {
+  const { felhasznalonev } = req.params;
+  try {
+    const [rows] = await db.query("SELECT * FROM felhasznalo WHERE felhasznalonev = ?", [felhasznalonev]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Tervek listázása bejelentkezett felhasználónak
 app.get("/api/plans/:felhasznalonev", async (req, res) => {
   const { felhasznalonev } = req.params;
@@ -271,6 +319,105 @@ app.get("/api/planRoutes/:tervId", async (req, res) => {
     res.json(rows);
   } catch (err) {
     console.error(" ^}^l SQL error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Terv létrehozása id: autoincrement
+app.post("/api/addPlan", async (req, res) => {
+  const { felhasznalonev } = req.body;
+  try {
+    const [rows] = await db.query(
+      "INSERT INTO tervek (felhasznalonev) VALUES (?)",
+      [felhasznalonev]
+    );
+    res.json({ message: "Sikeres terv hozzáadás" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Járat adatai
+app.get("/api/route/:jaratId", async (req, res) => {
+  const { jaratId } = req.params;
+  try {
+    const [rows] = await db.query("SELECT * FROM jarat WHERE id = ?", [jaratId]);
+    res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Járat hozzáadása
+app.post("/api/addRoute", async (req, res) => {
+  const { ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id } = req.body;
+  try {
+    const [rows] = await db.query(
+      "INSERT INTO jarat (ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id]
+    );
+    res.json({ message: "Sikeres járat hozzáadás" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Terv_jarat hozzáadása
+app.post("/api/addPlanRoute", async (req, res) => {
+  const { jarat_id, terv_id, sorrend } = req.body;
+  try {
+    const [rows] = await db.query(
+      "INSERT INTO terv_jarat (jarat_id, terv_id, sorrend) VALUES (?, ?, ?)",
+      [jarat_id, terv_id, sorrend]
+    );
+    res.json({ message: "Sikeres terv_jarat hozzáadás" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Terv_jarat törlése
+app.delete("/api/planRouteDelete/:jaratId", async (req, res) => {
+  const { jaratId } = req.params;
+  try {
+    const [rows] = await db.query(
+      "DELETE FROM terv_jarat WHERE jarat_id = ?",
+      [jaratId]
+    );
+    res.json({ message: "Sikeres terv_jarat törlés" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Terv törlése: törli az összes terv_jarat tábla és az összes járat tábla adatokat + jarat táblából az id, felhasznalonev
+app.delete("/api/planDelete/:tervId", async (req, res) => {
+  const { tervId } = req.params;
+  try {
+    const [rows] = await db.query(
+      "DELETE FROM terv_jarat WHERE terv_id = ?",
+      [tervId]
+    );
+    const [rows2] = await db.query(
+      "DELETE FROM jarat WHERE id IN (SELECT jarat_id FROM terv_jarat WHERE terv_id = ?)",
+      [tervId]
+    );
+    const [rows3] = await db.query(
+      "DELETE FROM tervek WHERE id = ?",
+      [tervId]
+    );
+    res.json({ message: "Sikeres terv törlés" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Kedvezmények listázása
+app.get("/api/kedvezmenyek", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM kedvezmenyek");
+    res.json(rows);
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
