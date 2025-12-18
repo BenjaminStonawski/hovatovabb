@@ -5,7 +5,7 @@
   <div class="row d-none d-md-flex align-items-center">
     <!-- bal -->
     <div class="col-md-4 chip-row">
-      <div class="chip transport">
+      <div class="chip transport" [style.background]="getTransportBackground()">
         <ng-container *ngFor="let m of vehicleModes">
           <img class="chip-icon" [src]="iconForMode(m)" />
         </ng-container>
@@ -29,8 +29,8 @@
       <ng-template #noTransfers>
         <div class="transfers-indicator">
           <img src="icons/ticket.svg" class="clock" />
-          <label *ngIf="journey.nativeData[0]?.Fare > 0; else noTicket">
-            {{ journey.nativeData[0]?.Fare }} Ft
+          <label *ngIf="calcFare() !== null; else noTicket">
+            {{ calcFare() }} Ft
           </label>
           <ng-template #noTicket>
             <label>
@@ -59,7 +59,7 @@
     <!-- első sor: bal + jobb -->
     <div class="row align-items-center mb-2">
       <div class="col-6 chip-row">
-        <div class="chip transport">
+        <div class="chip transport" [style.background]="getTransportBackground()">
           <ng-container *ngFor="let m of vehicleModes">
             <img class="chip-icon" [src]="iconForMode(m)" />
           </ng-container>
@@ -129,8 +129,8 @@
           ? journey.nativeData[0]?.DepStationName.replace('váróterem', 'vt.')
           : journey.nativeData[0]?.DepStationName }}
         </div>
-        <div class="platform" *ngIf="journey.nativeData[0]?.Platform">
-          Vágány: {{ journey.nativeData[0].Platform }}
+        <div class="platform" *ngIf="journey.nativeData[0]?.bay">
+          {{ journey.nativeData[0].bay }}
         </div>
       </div>
     </div>
@@ -139,14 +139,19 @@
       <div class="duration">
         <img src="icons/clock.svg" class="clock" />
         {{ journey.osszido ?? journey.duration ?? '—' }}
+
+        <!-- KÉSÉS KIÍRÁSA -->
+        <div class="delay-text" *ngIf="(journey.arrivalDelayMin ?? 0) > 0">
+          Késés: {{ journey.arrivalDelayMin }} perc
+        </div>
       </div>
     </div>
 
     <div class="col-4">
       <div class="block text-end">
         <label>Érkezés</label>
-        <div class="time" [style.color]="journey.arrivalDelayed ? '#f87171' : 'white'">
-          {{ journey.realArrival }}
+        <div class="time" [style.color]="(journey.arrivalDelayMin ?? 0) > 0 ? '#f87171' : 'white'">
+          {{ journey.arrivalDisplay || journey.realArrival || '—' }}
         </div>
         <div class="station-right">
           <img src="icons/pin.svg" class="pin" />
@@ -195,11 +200,11 @@
             </div>
           </div>
 
-          <div *ngIf="seg.Fare && seg.Fare > 0; else noTicket" class="col-4 text-center">
+          <div *ngIf="calcFareForSegment(seg) !== null; else noTicket" class="col-4 text-center">
             <div>
               <img src="icons/ticket.svg" class="clock" /><br>
               <label>
-                {{ seg.Fare }} Ft
+                {{ calcFareForSegment(seg) }} Ft
               </label>
             </div>
           </div>

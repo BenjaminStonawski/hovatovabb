@@ -130,4 +130,8 @@ export class SearchService {
       })
     );
   }
+  
+  runsDelay(runIds: number[]) {
+    return this.http.post<any[]>(`${this.baseUrl}/runsDelay`, { runs: runIds });
+  }
 }

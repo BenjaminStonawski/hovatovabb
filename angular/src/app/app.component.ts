@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { UserService } from './services/user.service';
+import { AlertService } from './services/alert.service';
 
 @Component({
   selector: 'app-root',
@@ -7,7 +9,22 @@ import { Component } from '@angular/core';
   standalone: false
 })
 export class AppComponent {
-  activeTab: 'search' | 'plans' | 'details' = 'search';
+  title = 'hovatovabb';
+  activeTab: 'search' | 'plan' | 'details' = 'search';
+  
+  constructor(public userService: UserService, public alertService: AlertService) { }
+
+  get user$() {
+    return this.userService.user$;
+  }
+
+  showLogin = false;
+  showRegister = false;
+  showUser = false;
+
+  logout() {
+    this.userService.logout();
+  }
 
   selectedPlan: any = null;
 
@@ -18,6 +35,11 @@ export class AppComponent {
 
   backToPlans() {
     this.selectedPlan = null;
-    this.activeTab = 'plans';
+    this.activeTab = 'plan';
+  }
+
+  logoutBtn() {
+    this.userService.logout();
+    this.alertService.show('Sikeresen kijelentkeztél!');
   }
 }

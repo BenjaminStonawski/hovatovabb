@@ -3,7 +3,10 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const mysql = require("mysql2/promise");
 const dotenv = require("dotenv");
+const bcrypt = require("bcrypt");
 dotenv.config();
+
+const SALT_ROUNDS = 12;
 
 const app = express();
 const PORT = 3000;
@@ -225,18 +228,62 @@ app.post("/api/runDescription", async (req, res) => {
   }
 });
 
+// Késés lekérés (runId lista)
+app.post("/api/runsDelay", async (req, res) => {
+  const { runs } = req.body; // pl. [335943, 1492868]
+
+  if (!Array.isArray(runs) || runs.length === 0) {
+    return res.status(400).json({ error: "Missing or invalid parameters", received: req.body });
+  }
+
+  const payload = {
+    func: "getRunsDelay",
+    params: { runs }
+  };
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+
+    // menetrendek válasz: data.result.data = [{run_id, delay, ...}]
+    res.json(data?.result?.data || []);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Bejelentkezés
 app.post("/api/login", async (req, res) => {
   const { felhasznalonev, jelszo } = req.body;
+
   try {
+    // csak usernév alapján keresünk
     const [rows] = await db.query(
-      "SELECT * FROM felhasznalo WHERE felhasznalonev = ? AND jelszo = ?",
-      [felhasznalonev, jelszo]
+      "SELECT * FROM felhasznalo WHERE felhasznalonev = ?",
+      [felhasznalonev]
     );
+
     if (rows.length === 0) {
       return res.status(401).json({ error: "Hibás felhasználónév vagy jelszó" });
     }
-    res.json({ message: "Sikeres bejelentkezés", user: rows[0] });
+
+    const user = rows[0];
+
+    // bcrypt ellenőrzés
+    const ok = await bcrypt.compare(jelszo, user.jelszo);
+    if (!ok) {
+      return res.status(401).json({ error: "Hibás felhasználónév vagy jelszó" });
+    }
+
+    // soha ne küldd vissza a hash-t
+    delete user.jelszo;
+
+    res.json({ message: "Sikeres bejelentkezés", user });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -245,11 +292,16 @@ app.post("/api/login", async (req, res) => {
 // Regisztráció
 app.post("/api/register", async (req, res) => {
   const { felhasznalonev, jelszo, email, teljes_nev, kedv_id } = req.body;
+
   try {
-    const [rows] = await db.query(
+    // hash
+    const passwordHash = await bcrypt.hash(jelszo, SALT_ROUNDS);
+
+    await db.query(
       "INSERT INTO felhasznalo (felhasznalonev, jelszo, email, teljes_nev, kedv_id) VALUES (?, ?, ?, ?, ?)",
-      [felhasznalonev, jelszo, email, teljes_nev, kedv_id]
+      [felhasznalonev, passwordHash, email, teljes_nev, kedv_id]
     );
+
     res.json({ message: "Regisztráció sikeres" });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -257,13 +309,28 @@ app.post("/api/register", async (req, res) => {
 });
 
 // Felhasználó adatainak módosítása
-app.put("/api/user/:felhasznalonev", async (req, res) => {
-  const { felhasznalonev } = req.params;
-  const { email, teljes_nev, kedv_id, jelszo } = req.body;
-  try {
-    const [rows] = await db.query("UPDATE felhasznalo SET email = ?, teljes_nev = ?, kedv_id = ?, jelszo = ? WHERE felhasznalonev = ?", [email, teljes_nev, kedv_id, jelszo, felhasznalonev]);
-    res.json({ message: "Felhasználó adatainak frissítése sikeres" });
-  } catch (err) { 
+app.put("/api/user/:felhasznalonev", async (req, res) => { 
+  const { felhasznalonev } = req.params; 
+  const { email, teljes_nev, kedv_id, jelszo } = req.body; 
+  
+  try { 
+    let sql = `UPDATE felhasznalo SET email = ?, teljes_nev = ?, kedv_id = ?`; 
+    const params = [email, teljes_nev, kedv_id]; 
+
+    if (jelszo && String(jelszo).trim() !== "") { 
+      const hash = await bcrypt.hash(jelszo, SALT_ROUNDS);
+      sql += ", jelszo = ?"; 
+      params.push(hash); 
+    } 
+
+    sql += " WHERE felhasznalonev = ?"; 
+    params.push(felhasznalonev); 
+
+    await db.query(sql, params); 
+    
+    res.json({ message: "Felhasználó adatainak frissítése sikeres" }); 
+  } 
+  catch (err) {
     res.status(500).json({ error: err.message }); 
   }
 });

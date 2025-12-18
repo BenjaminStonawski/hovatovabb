@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Input } from '@angular/core';
 import { SearchService } from '../../services/search.service';
 import { forkJoin, map } from 'rxjs';
 
@@ -9,9 +9,12 @@ import { forkJoin, map } from 'rxjs';
   styleUrls: ['./search.component.css']
 })
 export class SearchComponent implements OnInit {
+  @Input() kedvId: number = 3;
+
   from: any = null;
   to: any = null;
   journeys: any[] = [];
+  calcDelays = false;
   loading = false;
   error = '';
   allowTransfers = true;
@@ -47,116 +50,163 @@ export class SearchComponent implements OnInit {
     document.getElementById('search-to').querySelector("input").value = this.to?.lsname ?? '';
   }
 
-  kereses = false;
+  searchDone = false;
   onSearch() {
     this.error = '';
     this.journeys = [];
 
     if (!this.from || !this.to) {
-      document.getElementById('search-from').querySelector("input").style.borderColor = "#f87171";
-      document.getElementById('search-to').querySelector("input").style.borderColor = "#f87171";
       this.error = 'Válassz indulási és érkezési állomást!';
       return;
     }
 
-    // input border reset
-    document.getElementById('search-from').querySelector("input").style.borderColor = "#374151";
-    document.getElementById('search-to').querySelector("input").style.borderColor = "#374151";
-
-    // fő loading
     this.loading = true;
-
-    // 🔥 delay loading flag
     this.delayLoading = false;
 
-    // dátum
     const dateToSend = this.selectedDate || new Date().toISOString().split("T")[0];
 
-    // idő (HH:mm → óra + perc)
-    const [hourString, minuteString] = (
-      this.selectedTime || `${new Date().getHours()}:${new Date().getMinutes()}`
-    ).split(":");
-
+    const now = new Date();
+    const fallbackTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const [hourString, minuteString] = (this.selectedTime || fallbackTime).split(":");
     const hourToSend = parseInt(hourString, 10);
     const minuteToSend = parseInt(minuteString, 10);
 
     this.search.searchRoutesCustom(this.from, this.to, dateToSend, hourToSend, minuteToSend)
       .subscribe({
         next: res => {
-          this.loading = false; // a keresés befejeződött
+          let arr: any[] = res || [];
 
-          let arr = res || [];
-
+          // ghost szűrés (a tiéd)
           arr = arr.filter(j => {
             const seg = j.nativeData?.[0];
             const last = j.nativeData?.[j.nativeData.length - 1];
-
             if (!seg || !last) return false;
-            if (!seg.DepartureTime || !last.ArrivalTime) return false;
-
-            // DepartureTime / ArrivalTime numeric check
-            if (isNaN(seg.DepartureTime) || isNaN(last.ArrivalTime)) return false;
-
+            if (seg.DepartureTime == null || last.ArrivalTime == null) return false;
+            if (isNaN(Number(seg.DepartureTime)) || isNaN(Number(last.ArrivalTime))) return false;
             return true;
           });
 
-          // ha a felhasználó nem engedi az átszállást, szűrjük
+          // átszállás szűrés
           if (!this.allowTransfers) {
             arr = arr.filter(j => (j.nativeData?.length ?? 1) === 1);
           }
 
-          if (arr.length === 0) {
-            // nincs találat → delay sem fog töltődni
-            this.journeys = [];
+          arr.forEach(j => {
+            const first = j.nativeData?.[0];
+            const last = j.nativeData?.[j.nativeData.length - 1];
+
+            // nativeData idő percben -> HH:mm
+            j.realDeparture = this.formatMinutes(first?.DepartureTime);
+            j.realArrival = this.formatMinutes(last?.ArrivalTime);
+
+            // késés nélküli alap
+            j.arrivalDelayMin = 0;
+            j.arrivalDisplay = j.realArrival;
+          });
+
+
+          // ha NINCS késésszámítás → kész is
+          if (!this.calcDelays) {
+            this.journeys = arr;      // sima lista
+            this.loading = false;
+            this.delayLoading = false;
             return;
           }
 
-          // 🔥 most indul a késésadatok betöltése
+          // ✅ gyors előnézet azonnal
+          this.journeys = arr;
+
+          // innentől "késések számítása..."
+          this.loading = false;
           this.delayLoading = true;
 
           const date = dateToSend;
 
+          // 1) runDescription alapú “realDeparture/realArrival”
           forkJoin(
             arr.map(journey =>
               forkJoin(
-                journey.nativeData.map(seg =>
+                journey.nativeData.map((seg: any) =>
                   this.search.getDelayInfo(seg.RunId, seg.DepartureStation, seg.ArrivalStation, date)
                 )
               ).pipe(
-                map(delayList => {
+                map((delayList: any[]) => {
                   journey.delayInfo = delayList;
                   return journey;
                 })
               )
             )
-          ).subscribe(final => {
+          ).subscribe({
+            next: (final: any[]) => {
+              // runDescription -> realDeparture/realArrival
+              final.forEach(journey => {
+                const firstSegDelay = journey.delayInfo[0];
+                const lastSegDelay = journey.delayInfo[journey.delayInfo.length - 1];
 
-            // 🔥 késésadatok betöltődtek
-            this.delayLoading = false;
+                const fromName = journey.indulasi_hely || firstSegDelay.stops?.[0]?.megallo;
+                const toName = journey.erkezesi_hely || lastSegDelay.stops?.[lastSegDelay.stops.length - 1]?.megallo;
 
-            // késések alkalmazása indulási / érkezési időre
-            final.forEach(journey => {
-              const firstSegDelay = journey.delayInfo[0];
-              const lastSegDelay = journey.delayInfo[journey.delayInfo.length - 1];
+                const depPick = this.pickDepartureFromSegment(firstSegDelay, fromName);
+                const arrPick = this.pickArrivalFromSegment(lastSegDelay, toName);
 
-              const fromName = journey.indulasi_hely || firstSegDelay.stops?.[0]?.megallo;
-              const toName = journey.erkezesi_hely || lastSegDelay.stops?.[lastSegDelay.stops.length - 1]?.megallo;
+                journey.realDeparture = depPick.time;
+                journey.realArrival = arrPick.time;
+                journey.departureDelayed = depPick.delayed;
+                journey.arrivalDelayed = arrPick.delayed;
 
-              const dep = this.pickDepartureFromSegment(firstSegDelay, fromName);
-              const arr = this.pickArrivalFromSegment(lastSegDelay, toName);
+                // defaultok (runsDelay-hez)
+                journey.arrivalDelayMin = 0;
+                journey.arrivalDisplay = journey.realArrival;
+              });
 
-              journey.realDeparture = dep.time;
-              journey.realArrival = arr.time;
-              journey.departureDelayed = dep.delayed;
-              journey.arrivalDelayed = arr.delayed;
-            });
+              // 2) getRunsDelay -> érkezéshez hozzáadás
+              const runIds = Array.from(new Set(
+                final.map(j => Number(j.nativeData?.[j.nativeData.length - 1]?.RunId)).filter(Boolean)
+              ));
 
-            // rendezés valós indulási idő szerint
-            final.sort((a, b) =>
-              this.timeToMinutes(a.realDeparture) - this.timeToMinutes(b.realDeparture)
-            );
+              this.search.runsDelay(runIds).subscribe({
+                next: (rows: any[]) => {
+                  const delayMap = new Map<number, string>();
+                  (rows || []).forEach(r => delayMap.set(Number(r.run_id), String(r.delay || '00:00:00')));
 
-            this.journeys = final;
+                  final.forEach(journey => {
+                    const lastSeg = journey.nativeData?.[journey.nativeData.length - 1];
+                    const runId = Number(lastSeg?.RunId);
+
+                    const delayStr = delayMap.get(runId) ?? '00:00:00';
+                    const delayMin = this.delayToMinutes(delayStr);
+
+                    if (delayMin > 0 && journey.realArrival) {
+                      journey.arrivalDelayMin = delayMin;
+                      journey.arrivalDisplay = this.addMinutesToHHmm(journey.realArrival, delayMin);
+                    } else {
+                      journey.arrivalDelayMin = 0;
+                      journey.arrivalDisplay = journey.realArrival;
+                    }
+                  });
+
+                  // rendezés
+                  final.sort((a, b) =>
+                    this.timeToMinutes(a.realDeparture) - this.timeToMinutes(b.realDeparture)
+                  );
+
+                  this.journeys = final;
+                  this.delayLoading = false;
+                },
+                error: _ => {
+                  // delay nélkül is frissítjük a finalt
+                  final.sort((a, b) =>
+                    this.timeToMinutes(a.realDeparture) - this.timeToMinutes(b.realDeparture)
+                  );
+                  this.journeys = final;
+                  this.delayLoading = false;
+                }
+              });
+            },
+            error: err => {
+              this.error = err?.message ?? 'Hiba történt';
+              this.delayLoading = false;
+            }
           });
         },
 
@@ -166,9 +216,8 @@ export class SearchComponent implements OnInit {
           this.error = err?.message ?? 'Hiba történt';
         }
       });
-
-    this.kereses = true;
   }
+
 
   onDateChange(event: any) {
     this.selectedDate = event.target.value;
@@ -182,7 +231,6 @@ export class SearchComponent implements OnInit {
   selectedJourneyInfo: any = null;
 
   openJourneyInfo(j: any) {
-    console.log("INFO KATTINTVA:", j); // Most már MEG FOG JELENNI!
     this.selectedJourneyInfo = j;
   }
 
@@ -240,6 +288,33 @@ export class SearchComponent implements OnInit {
 
     if (va) return { time: va, delayed: segmentDelay.hasArrivalDelay };
     return { time: sa, delayed: false };
+  }
+
+  delayToMinutes(delay: string): number {
+    if (!delay) return 0;
+
+    const neg = delay.startsWith('-');
+    const [h, m, s] = delay.replace('-', '').split(':').map(Number);
+    const min = h * 60 + m + Math.round((s || 0) / 60);
+
+    return neg ? -min : min;
+  }
+
+  addMinutesToHHmm(time: string, add: number): string {
+    const [h, m] = time.split(':').map(Number);
+    let total = h * 60 + m + add;
+
+    total = ((total % 1440) + 1440) % 1440;
+
+    return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+  }
+
+  private formatMinutes(t: any): string {
+    const n = Number(t);
+    if (isNaN(n)) return '';
+    const h = Math.floor(n / 60) % 24;
+    const m = n % 60;
+    return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
 
 }

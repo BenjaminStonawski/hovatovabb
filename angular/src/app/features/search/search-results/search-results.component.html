@@ -2,6 +2,7 @@
   <app-journey-card
     *ngFor="let j of journeys"
     [journey]="j"
+    [kedvId]="kedvId"
     (info)="onInfo(j)">
   </app-journey-card>
 </div>

@@ -1,4 +1,12 @@
-/* háttér */
+input {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #374151;
+    background: #111827;
+    color: #fff;
+}
+
 .overlay {
   position: fixed;
   inset: 0;
@@ -7,7 +15,6 @@
   z-index: 998;
 }
 
-/* modal window */
 .modal-container {
   position: fixed;
   z-index: 999;
@@ -56,46 +63,11 @@
   cursor: pointer;
 }
 
-.segment-box {
-  background: #0f172a;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 16px;
-}
-
-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 8px;
-}
-
-td, th {
-  padding: 6px;
-  border-bottom: 1px solid #334155;
+.tab-icon {
+  width: 18px;
+  height: 18px;
 }
 
 .error {
-  color: #f87171;
-}
-
-.segment-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.segment-title .chip-icon {
-  width: 22px;
-  height: 22px;
-  opacity: 0.9;
-}
-
-.seg-index {
-  font-weight: 600;
-  color: #9ca3af;
-}
-
-.seg-line {
-  font-weight: 700;
-  color: #fff;
+    color: #f87171;
 }

@@ -10,6 +10,11 @@ import { SearchResultsComponent } from './features/search/search-results/search-
 import { JourneyCardComponent } from './features/search/journey-card/journey-card.component';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { JourneyInfoComponent } from './features/search/journey-info/journey-info.component';
+import { LoginComponent } from './features/user/login/login.component';
+import { RegisterComponent } from './features/user/register/register.component';
+import { UserComponent } from './features/user/user/user.component';
+import { AlertComponent } from './features/misc/alert/alert.component';
+import { PlanComponent } from './features/plan/plan.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +23,12 @@ import { JourneyInfoComponent } from './features/search/journey-info/journey-inf
     SearchFormComponent,
     SearchResultsComponent,
     JourneyCardComponent,
-    JourneyInfoComponent
+    JourneyInfoComponent,
+    LoginComponent,
+    RegisterComponent,
+    UserComponent,
+    AlertComponent,
+    PlanComponent
   ],
   imports: [
     BrowserModule,

@@ -1,0 +1,12 @@
+<app-login *ngIf="showLogin" (close)="showLogin = false"></app-login>
+
+<div *ngIf="!(user$ | async)" class="not-logged-in">
+    <div class="msg">
+        <p>Tervek létrehozásához és szerkesztéséhez kérjük, <a class="inline-link" (click)="showLogin = true">jelentkezz be</a>!</p>
+    </div>
+</div>
+<div *ngIf="(user$ | async)" class="logged-in">
+    <div class="msg">
+        <p>Funkció fejlesztés alatt!</p>
+    </div>
+</div>

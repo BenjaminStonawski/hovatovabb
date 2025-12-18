@@ -33,8 +33,7 @@
 }
 
 .transport {
-  background: #1e40af;
-  color: #c7d2fe;
+  color: #ffffffae;
 }
 
 .agency {
@@ -166,9 +165,9 @@ label {
   background: transparent;
   font-weight: 600;
   cursor: pointer;
-  display:flex;
-  align-items:center;
-  gap:6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
   justify-content: center;
 }
 
@@ -189,9 +188,9 @@ label {
   border: 1px solid #26303b;
   padding: 12px;
   border-radius: 10px;
-  display:flex;
-  flex-direction:column;
-  gap:8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .segment {
@@ -204,30 +203,30 @@ label {
 }
 
 .seg-header {
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
 .seg-index {
-  color:#94a3b8;
-  font-size:13px;
+  color: #94a3b8;
+  font-size: 13px;
 }
 
 .seg-mode {
-  display:flex;
-  align-items:center;
-  gap:8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .seg-body {
-  margin-top:8px;
-  color:#cbd5e1;
-  font-size:14px;
-  display:flex;
-  flex-direction:column;
-  gap:4px;
+  margin-top: 8px;
+  color: #cbd5e1;
+  font-size: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .info-btn {
@@ -244,4 +243,12 @@ label {
 
 .info-btn:hover .info-icon {
   opacity: 1;
+}
+
+.delay-text {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #f87171;
+  /* ugyanaz a piros, mint az érkezési időnél */
+  font-weight: 600;
 }

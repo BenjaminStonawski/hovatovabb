@@ -9,6 +9,7 @@ import { JourneyResult } from '../../../models.model';
 })
 export class SearchResultsComponent {
   @Input() journeys: JourneyResult[] = [];
+  @Input() kedvId: number = 3;
   @Output() info = new EventEmitter<any>();
   @Input() date: string = ""; 
 

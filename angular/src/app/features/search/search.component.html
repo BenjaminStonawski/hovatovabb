@@ -16,10 +16,21 @@
           <span>Keresés</span>
         </button>
       </div>
-      <label class="mt-2 allow-transfers" title="Ha bepipálod, több átszállást is engedélyez a keresés">
-        <input type="checkbox" [(ngModel)]="allowTransfers" />
-        Több átszállás engedélyezése
-      </label>
+      <div class="row">
+        <div class="col-12 col-md-6">
+          <label class="mt-2 allow-transfers" title="Ha bepipálod, több átszállást is engedélyez a keresés">
+            <input type="checkbox" [(ngModel)]="allowTransfers" />
+            Több átszállás engedélyezése
+          </label>
+        </div>
+        <div class="col-12 col-md-6 text-end">
+          <label class="mt-2 allow-transfers" title="Ha bepipálod, késéseket is számít a keresés">
+            <input type="checkbox" [(ngModel)]="calcDelays" />
+            Késések számítása
+          </label>
+        </div>
+      </div>
+
       <label class="time-label">Időpont</label>
       <div class="datetime-row">
         <div class="dt-input">
@@ -37,23 +48,25 @@
     </div>
   </div>
 
-  <div *ngIf="loading" class="muted"><img src="img/loading.gif" alt="Betöltés..." width="24px"></div>
-  <div *ngIf="delayLoading" class="muted">
+  <div *ngIf="loading" class="muted">
     <img src="img/loading.gif" alt="Betöltés..." width="24px">
   </div>
+
+  <div *ngIf="delayLoading" class="muted d-flex align-items-center gap-2">
+    <img src="img/loading.gif" alt="Betöltés..." width="24px">
+    <span>Késések számítása...</span>
+  </div>
+
   <div *ngIf="error" class="error">{{ error }}</div>
 
   <div *ngIf="journeys.length > 0">
-    <app-search-results [journeys]="journeys" (info)="openJourneyInfo($event)"></app-search-results>
+    <app-search-results [journeys]="journeys" [kedvId]="kedvId" (info)="openJourneyInfo($event)"></app-search-results>
   </div>
-  <div *ngIf="journeys.length === 0 && !loading && !delayLoading && kereses">
+  <div *ngIf="searchDone && journeys.length === 0 && !error">
     Nincs találat.
   </div>
 
-  <app-journey-info
-    *ngIf="selectedJourneyInfo"
-    [journey]="selectedJourneyInfo"
-    [date]="selectedDate || defaultDate"
+  <app-journey-info *ngIf="selectedJourneyInfo" [journey]="selectedJourneyInfo" [date]="selectedDate || defaultDate"
     (close)="closeJourneyInfo()">
   </app-journey-info>
 </div>
