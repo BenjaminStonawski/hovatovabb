@@ -128,10 +128,13 @@
           : journey.nativeData[0]?.DepStationName.includes('váróterem')
           ? journey.nativeData[0]?.DepStationName.replace('váróterem', 'vt.')
           : journey.nativeData[0]?.DepStationName }}
+          <div class="platform d-none d-md-block" *ngIf="journey.nativeData[0]?.FromBay">
+            {{ journey.nativeData[0].FromBay }}
+          </div>
         </div>
-        <div class="platform" *ngIf="journey.nativeData[0]?.bay">
-          {{ journey.nativeData[0].bay }}
-        </div>
+        <div class="platform d-block d-md-none" *ngIf="journey.nativeData[0]?.FromBay">
+            {{ journey.nativeData[0].FromBay }}
+          </div>
       </div>
     </div>
 

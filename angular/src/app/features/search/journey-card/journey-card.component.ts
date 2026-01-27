@@ -123,16 +123,36 @@ export class JourneyCardComponent {
     return owners.some((o: string) => o.includes('VOLÁN') || o.includes('VOLAN'));
   }
 
+  private isBKKJourney(): boolean {
+    const owners = (this.journey?.nativeData ?? [])
+      .map((s: any) => String(s?.OwnerName ?? '').toUpperCase());
+    return owners.some((o: string) => o.includes('BKK') || o.includes('BKK'));
+  }
+
+  private isLocalTrainJourney(): boolean {
+    const modes = (this.journey?.nativeData ?? [])
+      .map((s: any) => String(s?.TransportMode ?? '').toLowerCase());
+
+    return modes.some((m: string) => m.includes('vehicles.localtrain'));
+  }
+
   calcFare(): number | null {
     // nálad a fő kártyán általában az első szegmens Fare-ja van kiírva
     const fare = Number(this.journey?.nativeData?.[0]?.Fare ?? 0);
     if (!fare || fare <= 0) return null;
 
-    // kedvezmény csak VOLÁN-ra
-    if (!this.isVolanJourney()) return fare;
+    // szolgáltatók szerinti árak
+    if (this.isBKKJourney() && !this.isLocalTrainJourney()) {
+      return 500;
+    }
+    else if (this.isLocalTrainJourney()) {
+      return this.journey?.nativeData?.[0]?.Fare ?? 0;
+    }
+    else if (!this.isVolanJourney()) return fare;
 
     if (this.kedvId === 1) return 0;
     if (this.kedvId === 2) return Math.round(fare * 0.5);
+
     return fare; // 3
   }
 

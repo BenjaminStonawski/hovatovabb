@@ -5,7 +5,7 @@
 <p><em>Magyar tömegközlekedési menetrendtervező </em></p>
 
 </br>
-<img src="img/v04.svg" width="250px">
+<img src="img/v041.svg" width="250px">
 <a href="https://hova-tovabb.hu/">hova-tovabb.hu</a>
 </br>
 </br>

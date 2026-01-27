@@ -130,7 +130,12 @@ label {
 
 .platform {
   font-size: 14px;
-  color: #94a3b8;
+  color: #cbd5e1;
+  background-color: rgb(30, 64, 175);
+  text-align: center;
+  width: 35px;
+  border-radius: 100px;
+  padding: 2px;
 }
 
 .pin {
