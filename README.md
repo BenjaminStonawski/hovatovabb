@@ -29,6 +29,10 @@ Figma oldalak
   <li><a href="https://lung-cedar-76606657.figma.site">Levi</a></li>
 </ul>
 
+## 🧪 Tesztek
+<a href="https://github.com/BenjaminStonawski/hovatovabb/tree/main/backend/test">Backend</a><br>
+<a href="https://jasmine.hova-tovabb.hu/">Frontend</a><br>
+
 ## 🎯 Célunk az alkalmazással  
 - A legjobb alternatívát nyújtani a jelenlegi menetrendkereső alkalmazásokhoz képest  
 - Valós idejű és pontos információ biztosítása  
