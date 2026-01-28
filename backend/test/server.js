@@ -18,7 +18,7 @@ const API_URL = "https://menetrendek.hu/menetrend/newinterface/index.php";
 const db = require('./db');
 
 // fetch wrapper (dinamikus import)
-const fetch = (...args) => import("node-fetch").then(({ default: fetch }) => fetch(...args));
+const { fetchFn: fetch } = require('./fetchClient');
 
 // Állomás keresés
 app.post("/api/searchStation", async (req, res) => {

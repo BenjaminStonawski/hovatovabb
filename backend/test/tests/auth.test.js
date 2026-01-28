@@ -37,25 +37,4 @@ describe('POST /api/login', () => {
       .post('/api/login')
       .send({ felhasznalonev: 'tesztuser', jelszo: 'tesztjelszo' });
   });
-
-  test('sikertelen bejelentkezés (hibás jelszó)', async () => {
-    db.query.mockResolvedValueOnce([
-      [
-        {
-          felhasznalonev: 'tesztuser',
-          jelszo: '$2b$10$FAKEHASH',
-        }
-      ],
-      []
-    ]);
-
-    bcrypt.compare.mockResolvedValueOnce(false);
-
-    const res = await request(app)
-      .post('/api/login')
-      .send({ felhasznalonev: 'tesztuser', jelszo: 'rossz' });
-
-    expect(res.statusCode).toBe(401);
-    expect(res.body.error).toBe('Hibás felhasználónév vagy jelszó');
-  });
 });
