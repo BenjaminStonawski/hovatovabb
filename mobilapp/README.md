@@ -1,50 +1,105 @@
-# Welcome to your Expo app 👋
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+# 📱 HovaTovább Lite
 
-## Get started
+A **HovaTovább Lite** egy letisztult, gyors és könnyen használható mobil menetrendkereső alkalmazás.
+Azoknak a felhasználóknak készült, akik telefonjukon kizárólag a legegyszerűbb és legátláthatóbb menetrendkeresési funkciót szeretnék elérni – felesleges extra szolgáltatások nélkül.
 
-1. Install dependencies
+A Lite verzió célja a gyors keresés, a minimális kezelőfelület és a mobilra optimalizált felhasználói élmény biztosítása.
 
-   ```bash
-   npm install
-   ```
+---
 
-2. Start the app
+## 🎯 Célkitűzés
 
-   ```bash
-   npx expo start
-   ```
+A HovaTovább Lite olyan felhasználóknak készült, akik:
 
-In the output, you'll find options to open the app in a
+- 📍 Gyorsan szeretnének két állomás között menetrendet keresni
+- 📅 Egyedi dátum és idő alapján keresnének járatot
+- 🔁 Átszállásos útvonalakat is áttekinthetően szeretnének látni
+- 📱 Egyszerű, sötét témájú mobil felületet preferálnak
+- 🚫 Nem igényelnek regisztrációt vagy tervkezelési funkciókat
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+---
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+## ✨ Funkciók
 
-## Get a fresh project
+- 🔎 Állomáskeresés automatikus javaslatokkal
+- 🔄 Indulási és érkezési állomás felcserélése
+- 📅 Dátum és idő kiválasztása
+- 🚆 Járatok listázása
+- 🔁 Átszállásos útvonalak kezelése
+- 📊 Szakaszokra bontott megjelenítés
+- ℹ️ Részletes megállólista (információs modal)
+- 🎨 Modern, letisztult sötét UI
 
-When you're ready, run:
+---
+
+## 🧱 Technológiai háttér
+
+Az alkalmazás az alábbi technológiákra épül:
+
+- **React Native**
+- **Expo**
+- **TypeScript**
+- **expo-router**
+- **react-native-svg**
+- REST API alapú backend kommunikáció
+
+---
+
+## 🚀 Telepítés és futtatás
+
+### 1️⃣ Függőségek telepítése
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2️⃣ Fejlesztői mód indítása
 
-## Learn more
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Ezután:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- `a` → Android emulátor indítása
+- `i` → iOS szimulátor indítása (csak macOS-en)
+- QR-kód → Expo Go alkalmazással való futtatás fizikai eszközön
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 🌐 Backend kapcsolat
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Az alkalmazás REST API-n keresztül kommunikál a menetrend szolgáltató rendszerrel.
+
+Főbb végpontok:
+
+- `/searchStation` – Állomáskeresés szöveg alapján
+- `/searchRoutesCustom` – Járatkeresés dátum és idő szerint
+- `/runDescription` – Egy adott járat részletes megállólistája
+
+Az alkalmazás kizárólag olvasási műveleteket végez, adatot nem tárol a felhasználó eszközén.
+
+---
+
+## 🎨 Design alapelvek
+
+- Minimalista, letisztult megjelenés
+- Sötét (dark mode) alapértelmezett téma
+- Mobilképernyőre optimalizált elrendezés
+- Átlátható tipográfia és konzisztens ikonhasználat
+- Gyors navigáció és azonnali visszajelzés
+
+A cél a gyors információelérés és az intuitív használhatóság biztosítása.
+
+---
+
+## 📦 Verzió
+
+`1.0.0`
+
+---
+
+## 📄 Licenc
+
+Ez a projekt oktatási célból készült.
