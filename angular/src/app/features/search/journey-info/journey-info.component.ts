@@ -2,6 +2,11 @@ import { Component, Input, OnInit, Output, EventEmitter } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 import { SearchService } from '../../../services/search.service';
 
+type SegmentStops = {
+  segment: any;
+  stops: any[];
+};
+
 @Component({
   selector: 'app-journey-info',
   standalone: false,
@@ -10,14 +15,19 @@ import { SearchService } from '../../../services/search.service';
 })
 export class JourneyInfoComponent implements OnInit {
   @Input() journey: any = null; // teljes journey (több szakasz)
-  @Input() date: string = "";  // selectedDate
+  @Input() date: string = "";   // selectedDate (YYYY-MM-DD)
   @Output() close = new EventEmitter<void>();
-  stops: any[] = [];
 
   loading = false;
   error = '';
 
-  constructor(private search: SearchService) { }
+  // minden szakaszhoz megállólista
+  segments: SegmentStops[] = [];
+
+  // kiválasztott szakasz
+  selectedIndex = 0;
+
+  constructor(private search: SearchService) {}
 
   ngOnInit() {
     if (!this.journey) return;
@@ -26,16 +36,24 @@ export class JourneyInfoComponent implements OnInit {
 
   async loadAllSegments() {
     this.loading = true;
+    this.error = '';
+    this.segments = [];
+    this.selectedIndex = 0;
 
-    for (const seg of this.journey.nativeData) {
+    const native = Array.isArray(this.journey?.nativeData) ? this.journey.nativeData : [];
+
+    for (const seg of native) {
       try {
         const res = await firstValueFrom(
           this.search.getRunDescription(seg.RunId, seg.DepartureStation, seg.ArrivalStation, this.date)
         );
 
-        this.stops.push({
+        // ✅ nincs normalizálás: nyersen betesszük
+        const stops = Object.values(res || {}) as any[];
+
+        this.segments.push({
           segment: seg,
-          stops: Object.values(res || {})
+          stops
         });
       } catch (err) {
         this.error = "Nem sikerült betölteni a megállókat.";
@@ -45,19 +63,54 @@ export class JourneyInfoComponent implements OnInit {
     this.loading = false;
   }
 
+  selectSegment(i: number) {
+    this.selectedIndex = i;
+  }
+
+  get selectedSeg(): SegmentStops | null {
+    return this.segments?.[this.selectedIndex] ?? null;
+  }
+
+  segmentLine(seg: any): string {
+    // cél: DomainCode / LocalDomainCode / JourneyName / LongName / Number sorrendben
+    return (
+      seg?.DomainCode ||
+      seg?.LocalDomainCode ||
+      seg?.JourneyName ||
+      seg?.LongName ||
+      seg?.Number ||
+      '—'
+    );
+  }
+
   getSegmentIcon(segment: any): string {
-    const mode = (segment.TransportMode || segment.Mode || "").toLowerCase();
+    const mode = String(segment?.TransportMode || segment?.Mode || '').toLowerCase();
 
-    if (mode.includes("bus") || mode.includes("volan") || mode.includes("agglo"))
-      return "icons/bus.svg";
+    if (mode.includes('bus') || mode.includes('volan') || mode.includes('agglo')) return 'icons/bus.svg';
+    if (mode.includes('tram')) return 'icons/tram.svg';
+    if (mode.includes('metro')) return 'icons/metro.svg';
+    return 'icons/train.svg';
+  }
 
-    if (mode.includes("tram"))
-      return "icons/tram.svg";
+  // ---- időkezelés a template-hez ----
+  private cleanTime(v: any): string {
+    const s = String(v ?? '').trim();
+    if (!s) return '';
+    const low = s.toLowerCase();
+    if (low === 'n.a.' || low === 'n.a' || low === 'na') return '';
+    return s;
+  }
 
-    if (mode.includes("metro"))
-      return "icons/metro.svg";
+  isExpected(v: any): boolean {
+    // akkor várható, ha tényleg van érték (nem n.a. és nem "")
+    return !!this.cleanTime(v);
+  }
 
-    return "icons/train.svg"; // default
+  pickTime(expected: any, scheduled: any): string {
+    // ha van várható -> azt adjuk vissza, különben a menetrendit
+    const e = this.cleanTime(expected);
+    const s = this.cleanTime(scheduled);
+    return e || s || '';
   }
 
   onClose() {

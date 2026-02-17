@@ -1,8 +1,9 @@
+
 # HovaTovább - Angular Frontend
 
 📖 **Miről szól az Angular projekt**
 
-Ez az `angular/` mappa tartalmazza a HovaTovább alkalmazás **frontend részét**, amely Angular keretrendszerben készült.  
+Ez az `angular/` mappa tartalmazza a HovaTovább alkalmazás **frontend részét**, amely Angular keretrendszerben készült.
 Felelős a felhasználói felület megjelenítéséért, a menetrendek megjelenítéséért és az útvonaltervezés interaktív működéséért.
 
 ---
@@ -10,11 +11,13 @@ Felelős a felhasználói felület megjelenítéséért, a menetrendek megjelen�
 ## ⚙️ Főbb funkciók
 
 ### Alapfunkciók
+
 - 🚏 Automatikus útvonaltervezés a magyarországi menetrendek alapján
 - ⏱️ Valós idejű adatok megjelenítése (indulási és érkezési időpontok)
 - 📱 Könnyen áttekinthető, felhasználóbarát felület
 
 ### Egyedi funkciók
+
 - 🔄 Késések kezelése: az app figyelembe veszi a járatok valós idejű késéseit
 - ✏️ Manuális menetrendtervezés: a bejelentkezett felhasználók saját menetrendet állíthatnak össze
 
@@ -22,8 +25,8 @@ Felelős a felhasználói felület megjelenítéséért, a menetrendek megjelen�
 
 ## 🛠️ Használt technológiák
 
-- **Frontend:** Angular (TypeScript, HTML, SCSS)  
-- **Komponensek:** Angular Material, RxJS  
+- **Frontend:** Angular (TypeScript, HTML, SCSS)
+- **Komponensek:** Angular Material, RxJS
 - **API-k:** Kommunikáció a Node.js backenddel RESTful hívásokkal
 
 ---
@@ -41,12 +44,11 @@ A frontend moduláris felépítésének köszönhetően könnyen bővíthető:
 
 ## 📌 Projekt állapota
 
-Ez az Angular projekt **jelenleg fejlesztés alatt áll**, de már biztosítja a fő felhasználói interakciókat és az útvonaltervező logikát.  
-A projekt később teljes funkcionalitású frontendként szolgál a HovaTovább alkalmazáshoz.
+Megjelent az 1.0-ás verzió. Ez azt jelenti, hogy minden funkció, amit szerettünk volna, hogy tartalmazzon az alkalmazás elérhetővé vált.
 
 ---
 
 ## 👨‍💻 Készítők
 
-- Deák Levente  
+- Deák Levente
 - Stonawski Benjamin

@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
+import { filter } from 'rxjs/operators';
 import { UserService } from './services/user.service';
 import { AlertService } from './services/alert.service';
 
@@ -11,8 +13,20 @@ import { AlertService } from './services/alert.service';
 export class AppComponent {
   title = 'hovatovabb';
   activeTab: 'search' | 'plan' | 'details' = 'search';
-  
-  constructor(public userService: UserService, public alertService: AlertService) { }
+
+  isLegal = false;
+
+  constructor(
+    public userService: UserService,
+    public alertService: AlertService,
+    private router: Router
+  ) {
+    this.router.events
+      .pipe(filter(e => e instanceof NavigationEnd))
+      .subscribe(() => {
+        this.isLegal = this.router.url.startsWith('/jogi-informaciok');
+      });
+  }
 
   get user$() {
     return this.userService.user$;

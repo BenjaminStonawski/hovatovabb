@@ -14,7 +14,7 @@
           <img src="img/hovatovabb-512.png" alt="" width="50" class="d-inline-block align-text-center">
           <div>
             <h1 class="app-title">HovaTovább</h1>
-            <p class="app-subtitle">Magyar tömegközlekedési menetrendtervező</p>
+            <p class="app-subtitle">Közösségi menetrendtervező</p>
           </div>
         </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
@@ -55,32 +55,48 @@
     </nav>
   </header>
 
-  <!-- MAIN CONTENT -->
-  <div class="main">
-
-    <!-- TABS -->
-    <div class="tabs">
-      <button class="tab-button" [class.active]="activeTab === 'search'" (click)="activeTab = 'search'">
-        <img src="icons/train.svg" class="tab-icon">
-        Keresés
-      </button>
-
-      <button class="tab-button" [class.active]="activeTab === 'plan'" (click)="activeTab = 'plan'">
-        <img src="icons/map.svg" class="tab-icon">
-        Terveim
-      </button>
-    </div>
-
-    <!-- TAB CONTENT -->
-    <div class="content">
-      <div [hidden]="activeTab !== 'search'">
-        <app-search [kedvId]="(userService.user$ | async)?.user?.kedv_id ?? 3"></app-search>
-      </div>
-
-      <div [hidden]="activeTab !== 'plan'">
-        <app-plan (viewPlan)="openPlan($event)"></app-plan>
-      </div>
-    </div>
-
+  <!-- JOGI INFORMÁCIÓK VIEW -->
+  <div *ngIf="isLegal; else normalApp" class="main">
+    <router-outlet></router-outlet>
   </div>
+
+  <!-- NORMAL APP VIEW -->
+  <ng-template #normalApp>
+    <!-- MAIN CONTENT -->
+    <div class="main">
+
+      <!-- TABS -->
+      <div class="tabs">
+        <button class="tab-button" [class.active]="activeTab === 'search'" (click)="activeTab = 'search'">
+          <img src="icons/train.svg" class="tab-icon">
+          Keresés
+        </button>
+
+        <button class="tab-button" [class.active]="activeTab === 'plan' || activeTab === 'details'"
+          (click)="activeTab = 'plan'">
+          <img src="icons/map.svg" class="tab-icon">
+          Terveim
+        </button>
+      </div>
+
+      <!-- TAB CONTENT -->
+      <div class="content">
+        <div [hidden]="activeTab !== 'search'">
+          <app-search></app-search>
+        </div>
+
+        <div [hidden]="activeTab !== 'plan'">
+          <app-plan (viewPlan)="openPlan($event)"></app-plan>
+        </div>
+
+        <div [hidden]="activeTab !== 'details'">
+          <app-plan-details [plan]="selectedPlan" (back)="backToPlans()">
+          </app-plan-details>
+        </div>
+      </div>
+
+    </div>
+  </ng-template>
 </div>
+
+<app-cookie-consent></app-cookie-consent>

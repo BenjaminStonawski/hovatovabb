@@ -10,6 +10,7 @@ export class JourneyCardComponent {
   @Input() journey: any;
   @Input() kedvId: number = 3;
   @Output() info = new EventEmitter<any>();
+  @Output() addToPlan = new EventEmitter<any>();
 
   openInfo() {
     this.info.emit(this.journey);
@@ -169,5 +170,114 @@ export class JourneyCardComponent {
     if (this.kedvId === 1) return 0;
     if (this.kedvId === 2) return Math.round(fare * 0.5);
     return fare; // kedvId 3
+  }
+
+  openAddToPlan() {
+    this.addToPlan.emit(this.journey);
+  }
+
+  private abbreviateStopName(name: string): string {
+    let s = (name ?? '').trim();
+    if (!s) return '';
+
+    if (s === "Autóbusz-állomás") {
+      return "Autóbusz-áll.";
+    }
+
+    s = s.replace(/\s+/g, ' ');
+
+    s = s.replace(/autóbusz-állomás/gi, 'autóbusz-áll.');
+    s = s.replace(/vasútállomás/gi, 'vá.');
+    s = s.replace(/pályaudvar/gi, 'pu.');
+    s = s.replace(/váróterem/gi, 'vt.');
+    s = s.replace(/állomás/gi, 'áll.');
+
+    return s;
+  }
+
+  private splitStation(name: string): { city: string; stop: string } {
+    const s = this.abbreviateStopName(name);
+
+    const commaIdx = s.indexOf(',');
+    if (commaIdx !== -1) {
+      const city = s.slice(0, commaIdx).trim();
+      const stop = s.slice(commaIdx + 1).trim();
+      return { city: city || s, stop: stop || '' };
+    }
+
+    const m = s.match(/^(.*)\s+(vá\.|pu\.|vt\.|áll\.)$/i);
+    if (m) {
+      return { city: (m[1] ?? s).trim(), stop: (m[2] ?? '').trim() };
+    }
+
+    return { city: s, stop: '' };
+  }
+
+  formatStationHtml(name: string): string {
+    const { city, stop } = this.splitStation(name);
+    if (!stop) return `<strong>${this.escapeHtml(city)}</strong>`;
+    return `<strong>${this.escapeHtml(city)}</strong><br>${this.escapeHtml(stop)}`;
+  }
+
+  private escapeHtml(s: string): string {
+    return String(s ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  private toMinutes(time: any): number | null {
+    if (!time) return null;
+
+    if (typeof time === 'string') {
+      const m = time.match(/^(\d{1,2}):(\d{2})/);
+      if (m) return Number(m[1]) * 60 + Number(m[2]);
+    }
+
+    const n = Number(time);
+    if (!isNaN(n)) return n;
+
+    return null;
+  }
+
+  segmentDurationMinutes(seg: any): number | null {
+    const dep = this.toMinutes(seg?.DepartureTime ?? seg?.dep ?? seg?.indul);
+    const arr = this.toMinutes(seg?.ArrivalTime ?? seg?.arr ?? seg?.erkezik);
+
+    if (dep == null || arr == null) return null;
+
+    let diff = arr - dep;
+
+    // éjfél átlépés
+    if (diff < 0) diff += 24 * 60;
+
+    return diff;
+  }
+
+  formatDuration(mins: any): string {
+    const n = Number(mins);
+    if (!Number.isFinite(n)) return "--:--";
+
+    const hh = Math.floor(n / 60);
+    const mm = n % 60;
+
+    return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
+  }
+
+  segmentDurationText(seg: any): string {
+    // FONTOS: itt ugyanazt a mezőt használd, mint a format(...) hívásnál
+    const dep = Number(seg?.DepartureTime);
+    const arr = Number(seg?.ArrivalTime);
+
+    if (!Number.isFinite(dep) || !Number.isFinite(arr)) return "--:--";
+
+    let diff = arr - dep;
+
+    // ha éjfél átlépés van
+    if (diff < 0) diff += 24 * 60;
+
+    return this.formatDuration(diff);
   }
 }

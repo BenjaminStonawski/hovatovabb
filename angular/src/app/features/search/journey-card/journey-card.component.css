@@ -1,5 +1,5 @@
 .journey-card {
-  background: #1e293b;
+  background: #0f172a;
   border: 1px solid #334155;
   padding: 20px;
   border-radius: 16px;
@@ -234,20 +234,25 @@ label {
   gap: 4px;
 }
 
-.info-btn {
-  background: transparent;
-  border: none;
+.info-btn{
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #111b2c;
+  border: 1px solid #22324e;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  padding: 6px;
+}
+
+.info-btn:hover{
+  filter: brightness(1.08);
 }
 
 .info-icon {
   width: 22px;
   opacity: .8;
-}
-
-.info-btn:hover .info-icon {
-  opacity: 1;
 }
 
 .delay-text {
@@ -256,4 +261,28 @@ label {
   color: #f87171;
   /* ugyanaz a piros, mint az érkezési időnél */
   font-weight: 600;
+}
+
+.segment-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 0;
+}
+
+.fare-row {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.duration-row {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
 }

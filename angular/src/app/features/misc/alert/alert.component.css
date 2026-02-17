@@ -3,6 +3,7 @@
     color: white !important;
     border-radius: 8px !important;
     animation: fade 0.2s linear;
+	z-index:9999;
 }
 
 .toast-body {

@@ -43,8 +43,8 @@
 
     <!-- jobb -->
     <div class="col-md-4 text-end">
-      <div class="d-flex gap-1">
-        <button class="add-btn">
+      <div class="d-flex gap-1 justify-content-end">
+        <button *ngIf="(journey?.nativeData?.length ?? 1) === 1" class="add-btn" (click)="openAddToPlan()">
           <span class="plus">+</span> Tervhez
         </button>
         <button class="info-btn" (click)="openInfo()">
@@ -76,7 +76,7 @@
 
       <div class="col-6 text-end">
         <div class="d-flex gap-1">
-          <button class="add-btn">
+          <button *ngIf="(journey?.nativeData?.length ?? 1) === 1" class="add-btn" (click)="openAddToPlan()">
             <span class="plus">+</span> Tervhez
           </button>
         </div>
@@ -121,20 +121,14 @@
         </div>
         <div class="station">
           <img src="icons/pin.svg" class="pin" />
-          {{ journey.nativeData[0]?.DepStationName.includes('állomás')
-          ? journey.nativeData[0]?.DepStationName.replace('állomás', 'áll.')
-          : journey.nativeData[0]?.DepStationName.includes('pályaudvar')
-          ? journey.nativeData[0]?.DepStationName.replace('pályaudvar', 'pu.')
-          : journey.nativeData[0]?.DepStationName.includes('váróterem')
-          ? journey.nativeData[0]?.DepStationName.replace('váróterem', 'vt.')
-          : journey.nativeData[0]?.DepStationName }}
+          <span [innerHTML]="formatStationHtml(journey.nativeData[0]?.DepStationName || '')"></span>
           <div class="platform d-none d-md-block" *ngIf="journey.nativeData[0]?.FromBay">
             {{ journey.nativeData[0].FromBay }}
           </div>
         </div>
         <div class="platform d-block d-md-none" *ngIf="journey.nativeData[0]?.FromBay">
-            {{ journey.nativeData[0].FromBay }}
-          </div>
+          {{ journey.nativeData[0].FromBay }}
+        </div>
       </div>
     </div>
 
@@ -158,13 +152,8 @@
         </div>
         <div class="station-right">
           <img src="icons/pin.svg" class="pin" />
-          {{ journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.includes('állomás')
-          ? journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.replace('állomás', 'áll.')
-          : journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.includes('pályaudvar')
-          ? journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.replace('pályaudvar', 'pu.')
-          : journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.includes('váróterem')
-          ? journey.nativeData[journey.nativeData.length - 1]?.ArrStationName.replace('váróterem', 'vt.')
-          : journey.nativeData[journey.nativeData.length - 1]?.ArrStationName }}
+          <span
+            [innerHTML]="formatStationHtml(journey.nativeData[journey.nativeData.length-1]?.ArrStationName || '')"></span>
         </div>
       </div>
     </div>
@@ -189,13 +178,7 @@
               <div class="time">{{ format(seg.DepartureTime) }}</div>
               <div class="station">
                 <img src="icons/pin.svg" class="pin" />
-                {{ seg.DepStationName.includes('autóbusz-állomás')
-                ? seg.DepStationName.replace('autóbusz-állomás', 'autóbusz-áll.')
-                : seg.DepStationName.includes('pályaudvar')
-                ? seg.DepStationName.replace('pályaudvar', 'pu.')
-                : seg.DepStationName.includes('váróterem')
-                ? seg.DepStationName.replace('váróterem', 'vt.')
-                : seg.DepStationName }}
+                <span [innerHTML]="formatStationHtml(seg.DepStationName)"></span>
               </div>
               <div class="platform" *ngIf="seg.Platform">
                 Vágány: {{ seg.Platform }}
@@ -203,22 +186,31 @@
             </div>
           </div>
 
-          <div *ngIf="calcFareForSegment(seg) !== null; else noTicket" class="col-4 text-center">
-            <div>
-              <img src="icons/ticket.svg" class="clock" /><br>
+          <div class="segment-meta col-4">
+            <div *ngIf="calcFareForSegment(seg) !== null; else noTicket">
+              <div class="fare-row">
+                <img src="icons/ticket.svg" class="clock" /><br>
+                <label>
+                  {{ calcFareForSegment(seg) }} Ft
+                </label>
+              </div>
+            </div>
+            <ng-template #noTicket>
+              <div class="fare-row">
+                <img src="icons/ticket.svg" class="clock" /><br>
+                <label>
+                  –
+                </label>
+              </div>
+            </ng-template>
+
+            <div class="duration-row">
+              <img src="icons/clock.svg" class="clock" />
               <label>
-                {{ calcFareForSegment(seg) }} Ft
+                {{ segmentDurationText(seg) }}
               </label>
             </div>
           </div>
-          <ng-template #noTicket>
-            <div class="col-4 text-center">
-              <img src="icons/ticket.svg" class="clock" /><br>
-              <label>
-                –
-              </label>
-            </div>
-          </ng-template>
 
 
           <div class="col-4">
@@ -229,13 +221,7 @@
               </div>
               <div class="station-right">
                 <img src="icons/pin.svg" class="pin" />
-                {{ seg.ArrStationName.includes('autóbusz-állomás')
-                ? seg.ArrStationName.replace('autóbusz-állomás', 'autóbusz-áll.')
-                : seg.ArrStationName.includes('pályaudvar')
-                ? seg.ArrStationName.replace('pályaudvar', 'pu.')
-                : seg.ArrStationName.includes('váróterem')
-                ? seg.ArrStationName.replace('váróterem', 'vt.')
-                : seg.ArrStationName }}
+                <span [innerHTML]="formatStationHtml(seg.ArrStationName)"></span>
               </div>
             </div>
           </div>

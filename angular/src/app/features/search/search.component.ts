@@ -1,6 +1,8 @@
 import { Component, OnInit, Input } from '@angular/core';
 import { SearchService } from '../../services/search.service';
 import { forkJoin, map } from 'rxjs';
+import { UserService } from '../../services/user.service';
+import { PlanService } from '../../services/plan.service';
 
 @Component({
   selector: 'app-search',
@@ -16,6 +18,7 @@ export class SearchComponent implements OnInit {
   journeys: any[] = [];
   calcDelays = false;
   loading = false;
+  searched = false;
   error = '';
   allowTransfers = true;
   selectedDate: string = '';
@@ -37,7 +40,11 @@ export class SearchComponent implements OnInit {
   }
 
 
-  constructor(private search: SearchService) { }
+  constructor(
+    private search: SearchService,
+    private userService: UserService,
+    private planService: PlanService
+  ) { }
 
   onSelectFrom(s: any) { this.from = s; }
   onSelectTo(s: any) { this.to = s; }
@@ -109,12 +116,14 @@ export class SearchComponent implements OnInit {
           if (!this.calcDelays) {
             this.journeys = arr;      // sima lista
             this.loading = false;
+            this.searched = true;
             this.delayLoading = false;
             return;
           }
 
           // ✅ gyors előnézet azonnal
           this.journeys = arr;
+          this.searched = true;
 
           // innentől "késések számítása..."
           this.loading = false;
@@ -191,6 +200,7 @@ export class SearchComponent implements OnInit {
                   );
 
                   this.journeys = final;
+                  this.searched = true;
                   this.delayLoading = false;
                 },
                 error: _ => {
@@ -199,6 +209,7 @@ export class SearchComponent implements OnInit {
                     this.timeToMinutes(a.realDeparture) - this.timeToMinutes(b.realDeparture)
                   );
                   this.journeys = final;
+                  this.searched = true;
                   this.delayLoading = false;
                 }
               });
@@ -316,5 +327,4 @@ export class SearchComponent implements OnInit {
     const m = n % 60;
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
-
 }

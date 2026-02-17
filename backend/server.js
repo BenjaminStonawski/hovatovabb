@@ -125,7 +125,7 @@ app.post("/api/searchRoutesCustom", async (req, res) => {
     func: "getRoutes",
     params: {
       networks: [1, 2, 3, 10, 11, 12, 13, 14, 24, 25, 26],
-      datum: date,                       // <<< DÁTUM
+      datum: date,
       ind_stype: "megallo",
       erk_stype: "megallo",
 
@@ -139,8 +139,8 @@ app.post("/api/searchRoutesCustom", async (req, res) => {
       hova_settlement_id: to.settlementId,
       hova_site_code: to.siteCode ?? 0,
 
-      hour: hour.toString(),             // <<< ÓRA (stringben kell!)
-      min: minute.toString(),            // <<< PERC
+      hour: hour.toString(),
+      min: minute.toString(),
 
       ext_settings: "block",
       filtering: 0,
@@ -158,8 +158,8 @@ app.post("/api/searchRoutesCustom", async (req, res) => {
       talalatok: 1,
       target: 0,
       utirany: "oda",
-      var: "0"
-    }
+      var: "0",
+    },
   };
 
   try {
@@ -170,8 +170,47 @@ app.post("/api/searchRoutesCustom", async (req, res) => {
     });
 
     const data = await response.json();
-    res.json(data);
 
+    const normalizeOwner = (owner) => {
+      const o = String(owner ?? "").trim().toLowerCase();
+      return o === "mátészalka" || o === "mateszalka" ? "MSZ" : owner;
+    };
+
+    const normalizeStationForMSZ = (name, owner) => {
+      const o = String(owner ?? "").trim().toLowerCase();
+      if (o !== "mátészalka" && o !== "mateszalka") return name;
+
+      if (!name) return name;
+
+      let n = String(name).trim();
+
+      if (n.toLowerCase().startsWith("mátészalka,")) {
+        n = n.substring("mátészalka,".length).trim();
+      }
+
+      return n.charAt(0).toUpperCase() + n.slice(1);
+    };
+
+    const talalatok = data?.results?.talalatok;
+
+    if (talalatok && typeof talalatok === "object") {
+      Object.values(talalatok).forEach((journey) => {
+        const segs = journey?.nativeData;
+        if (Array.isArray(segs)) {
+          segs.forEach((seg) => {
+            if (!seg) return;
+
+            const originalOwner = seg.OwnerName;
+
+            seg.OwnerName = normalizeOwner(seg.OwnerName);
+            seg.DepStationName = normalizeStationForMSZ(seg.DepStationName, originalOwner);
+            seg.ArrStationName = normalizeStationForMSZ(seg.ArrStationName, originalOwner);
+          });
+        }
+      });
+    }
+
+    res.json(data);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -218,7 +257,6 @@ app.post("/api/runDescription", async (req, res) => {
 
     const data = await response.json();
 
-    // Return ONLY kifejtes_sor, fallback {}, frontend expects object
     return res.json(data?.results?.kifejtes_sor || {});
   }
 
@@ -309,29 +347,29 @@ app.post("/api/register", async (req, res) => {
 });
 
 // Felhasználó adatainak módosítása
-app.put("/api/user/:felhasznalonev", async (req, res) => { 
-  const { felhasznalonev } = req.params; 
-  const { email, teljes_nev, kedv_id, jelszo } = req.body; 
-  
-  try { 
-    let sql = `UPDATE felhasznalo SET email = ?, teljes_nev = ?, kedv_id = ?`; 
-    const params = [email, teljes_nev, kedv_id]; 
+app.put("/api/user/:felhasznalonev", async (req, res) => {
+  const { felhasznalonev } = req.params;
+  const { email, teljes_nev, kedv_id, jelszo } = req.body;
 
-    if (jelszo && String(jelszo).trim() !== "") { 
+  try {
+    let sql = `UPDATE felhasznalo SET email = ?, teljes_nev = ?, kedv_id = ?`;
+    const params = [email, teljes_nev, kedv_id];
+
+    if (jelszo && String(jelszo).trim() !== "") {
       const hash = await bcrypt.hash(jelszo, SALT_ROUNDS);
-      sql += ", jelszo = ?"; 
-      params.push(hash); 
-    } 
+      sql += ", jelszo = ?";
+      params.push(hash);
+    }
 
-    sql += " WHERE felhasznalonev = ?"; 
-    params.push(felhasznalonev); 
+    sql += " WHERE felhasznalonev = ?";
+    params.push(felhasznalonev);
 
-    await db.query(sql, params); 
-    
-    res.json({ message: "Felhasználó adatainak frissítése sikeres" }); 
-  } 
+    await db.query(sql, params);
+
+    res.json({ message: "Felhasználó adatainak frissítése sikeres" });
+  }
   catch (err) {
-    res.status(500).json({ error: err.message }); 
+    res.status(500).json({ error: err.message });
   }
 });
 
@@ -375,11 +413,13 @@ app.get("/api/planRoutes/:tervId", async (req, res) => {
   try {
     const [rows] = await db.query(
       `SELECT j.id, j.ind_allomas, j.erk_allomas, j.ind_ido, j.erk_ido,
-              j.jegyar, j.jarmu_id, j.ido, j.km, tj.sorrend
-       FROM terv_jarat tj
-       JOIN jarat j ON tj.jarat_id = j.id
-       WHERE tj.terv_id = ?
-       ORDER BY tj.sorrend ASC`,
+       j.jegyar, j.jarmu_id, j.ido, j.km, j.run_id, j.sls_id, j.els_id, j.elerte,
+       j.bay, j.owner, j.code,
+       tj.sorrend
+      FROM terv_jarat tj
+      JOIN jarat j ON tj.jarat_id = j.id
+      WHERE tj.terv_id = ?
+      ORDER BY tj.sorrend ASC`,
       [tervId]
     );
     console.log(" ^|^e SQL returned rows:", rows.length);
@@ -392,13 +432,17 @@ app.get("/api/planRoutes/:tervId", async (req, res) => {
 
 // Terv létrehozása id: autoincrement
 app.post("/api/addPlan", async (req, res) => {
-  const { felhasznalonev } = req.body;
+  const { felhasznalonev, nev } = req.body;
   try {
     const [rows] = await db.query(
-      "INSERT INTO tervek (felhasznalonev) VALUES (?)",
-      [felhasznalonev]
+      "INSERT INTO tervek (felhasznalonev, nev) VALUES (?, ?)",
+      [felhasznalonev, nev ?? "Új terv"]
     );
-    res.json({ message: "Sikeres terv hozzáadás" });
+
+    res.json({
+      message: "Sikeres terv hozzáadás",
+      tervId: rows.insertId
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -417,13 +461,15 @@ app.get("/api/route/:jaratId", async (req, res) => {
 
 // Járat hozzáadása
 app.post("/api/addRoute", async (req, res) => {
-  const { ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id } = req.body;
+  const { ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id, elerte, bay, owner, code } = req.body;
+
   try {
     const [rows] = await db.query(
-      "INSERT INTO jarat (ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-      [ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id]
+      "INSERT INTO jarat (ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id, elerte, bay, owner, code) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+      [ind_allomas, erk_allomas, ind_ido, erk_ido, jegyar, jarmu_id, ido, km, run_id, sls_id, els_id, elerte ?? 0, bay ?? '', owner ?? '', code ?? '']
     );
-    res.json({ message: "Sikeres járat hozzáadás" });
+
+    res.json({ message: "Sikeres járat hozzáadás", jaratId: rows.insertId });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -484,6 +530,23 @@ app.get("/api/kedvezmenyek", async (req, res) => {
   try {
     const [rows] = await db.query("SELECT * FROM kedvezmenyek");
     res.json(rows);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// terv -> elérte-e a járatot
+app.put("/api/routeStatus/:jaratId", async (req, res) => {
+  const { jaratId } = req.params;
+  const { elerte } = req.body; // 0 / 1 / 2
+
+  if (elerte !== 0 && elerte !== 1 && elerte !== 2) {
+    return res.status(400).json({ error: "Invalid elerte (0/1/2)" });
+  }
+
+  try {
+    await db.query("UPDATE jarat SET elerte = ? WHERE id = ?", [elerte, jaratId]);
+    res.json({ message: "OK" });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

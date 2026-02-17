@@ -23,7 +23,7 @@
             Több átszállás engedélyezése
           </label>
         </div>
-        <div class="col-12 col-md-6 text-end">
+        <div class="col-12 col-md-6 text-md-end text-start">
           <label class="mt-2 allow-transfers" title="Ha bepipálod, késéseket is számít a keresés">
             <input type="checkbox" [(ngModel)]="calcDelays" />
             Késések számítása
@@ -60,9 +60,15 @@
   <div *ngIf="error" class="error">{{ error }}</div>
 
   <div *ngIf="journeys.length > 0">
-    <app-search-results [journeys]="journeys" [kedvId]="kedvId" (info)="openJourneyInfo($event)"></app-search-results>
+    <app-search-results 
+      [journeys]="journeys" 
+      [kedvId]="kedvId" 
+      [selectedDate]="selectedDate"
+      (info)="openJourneyInfo($event)">
+    </app-search-results>
   </div>
-  <div *ngIf="searchDone && journeys.length === 0 && !error">
+
+  <div *ngIf="searched && journeys.length === 0" class="no-results">
     Nincs találat.
   </div>
 

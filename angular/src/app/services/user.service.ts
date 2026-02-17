@@ -108,4 +108,8 @@ export class UserService {
   isPasswordValid(password: string): boolean {
     return password.length >= 8 && password.match(/[0-9]/) && password.length <= 20;
   }
+
+  getLoggedInUser(): any {
+    return this.userSubject.value;
+  }
 }
