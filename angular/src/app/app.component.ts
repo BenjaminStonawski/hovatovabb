@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter } from 'rxjs/operators';
 import { UserService } from './services/user.service';
@@ -15,6 +15,15 @@ export class AppComponent {
   activeTab: 'search' | 'plan' | 'details' = 'search';
 
   isLegal = false;
+
+  kedvId: number = 3;
+
+  ngOnInit(): void {
+    this.userService.user$.subscribe((res: any) => {
+      const u = res?.user ?? res;
+      this.kedvId = u?.kedv_id ?? 3;
+    });
+  }
 
   constructor(
     public userService: UserService,

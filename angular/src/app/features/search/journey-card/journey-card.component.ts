@@ -151,8 +151,10 @@ export class JourneyCardComponent {
     }
     else if (!this.isVolanJourney()) return fare;
 
-    if (this.kedvId === 1) return 0;
-    if (this.kedvId === 2) return Math.round(fare * 0.5);
+    if (this.kedvId == 1) return 0;
+    if (this.kedvId == 2) {
+      return Math.round(fare * 0.5)
+    }
 
     return fare; // 3
   }

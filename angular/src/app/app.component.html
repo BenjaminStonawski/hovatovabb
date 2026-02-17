@@ -82,7 +82,9 @@
       <!-- TAB CONTENT -->
       <div class="content">
         <div [hidden]="activeTab !== 'search'">
-          <app-search></app-search>
+          <app-search
+            kedvId="{{ kedvId }}"
+          ></app-search>
         </div>
 
         <div [hidden]="activeTab !== 'plan'">

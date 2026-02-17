@@ -61,6 +61,7 @@ export class SearchComponent implements OnInit {
   onSearch() {
     this.error = '';
     this.journeys = [];
+    this.searched = false;
 
     if (!this.from || !this.to) {
       this.error = 'Válassz indulási és érkezési állomást!';
